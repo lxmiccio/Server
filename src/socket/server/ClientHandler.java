@@ -2,6 +2,7 @@ package socket.server;
 
 import java.io.*;
 import java.net.*;
+import java.util.Date;
 
 /**
  *
@@ -20,7 +21,12 @@ class ClientHandler implements Runnable
     {
         try
         {
-            readQuestion();
+            DataInputStream inFromClient = new DataInputStream(this.server.getInputStream());
+            if(inFromClient.readUTF().equals("Time?"))
+            {
+                System.out.print(this.server.getInetAddress().getCanonicalHostName() + " asks for time...");
+                this.sendTimeToClient();
+            }
         }
         catch(InterruptedException | IOException exception)
         {
@@ -28,17 +34,11 @@ class ClientHandler implements Runnable
         }
     }
     
-    private void readQuestion() throws InterruptedException, IOException
+    private void sendTimeToClient() throws InterruptedException, IOException
     {
-        DataInputStream fromClient = new DataInputStream(this.server.getInputStream());
-        if(fromClient.readUTF().equals("Choice?"))
-            sendChoice();
-    }
-    
-    private void sendChoice() throws IOException, InterruptedException
-    {
-        DataOutputStream out = new DataOutputStream(this.server.getOutputStream());
-        out.writeUTF("Paper");
-        out.flush();
+        DataOutputStream outToClient = new DataOutputStream(this.server.getOutputStream());
+        outToClient.writeUTF(new Date().toString());
+        outToClient.flush();
+        outToClient.close();
     }
 }
